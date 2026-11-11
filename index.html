@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="BRD Builder: turn a business need into a Business Requirements Document ready for engineering handoff. Built by Cat Nolasco, People Operations.">
+<title>BRD Builder | Cat Nolasco</title>
+<style>
+  @font-face{font-family:'Interstate';src:url('assets/fonts-blink/Interstate-condensed-800.woff2') format('woff2');font-weight:800;font-style:normal;font-display:swap}
+  @font-face{font-family:'Neue Haas Grotesk';src:url('assets/fonts-blink/NeueHaasGrotesk-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  @font-face{font-family:'Neue Haas Grotesk';src:url('assets/fonts-blink/NeueHaasGrotesk-Bold.woff2') format('woff2');font-weight:700;font-style:normal;font-display:swap}
+  @font-face{font-family:'Instrument Serif';src:url('assets/fonts-blink/InstrumentSerif-Regular.woff2') format('woff2');font-weight:400;font-style:normal;font-display:swap}
+  :root{
+    --bg:#fff; --ink:#171717; --muted:#6c6f72; --dim:#8a8d90;
+    --cherry:#DB374C; --cherry-deep:#b92c3f; --tint:#FBEBED;
+    --line:#e5e7eb; --line2:#d9dbdd; --field:#fafafa;
+    --navy:#122130; --yellow:#fffa6e; --flan:#ffe1a1;
+    --radius:10px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  body{background:var(--bg); color:var(--ink); font-family:'Neue Haas Grotesk','Interstate','Helvetica Neue',Helvetica,sans-serif; line-height:1.6; -webkit-font-smoothing:antialiased}
+  h1,h2,h3{font-family:'Interstate','Helvetica Neue',Helvetica,sans-serif; font-weight:800; letter-spacing:-.01em; line-height:1.05}
+  a{color:inherit; text-decoration:none}
+  .wrap{max-width:1200px; margin:0 auto; padding:0 28px}
+  .cherry{color:var(--cherry)}
+  .topbar{height:68px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--line)}
+  .brand{font-family:'Interstate',sans-serif; font-weight:800; font-size:17px; letter-spacing:-.01em}
+  .brand span{color:var(--cherry)}
+  .eyebrow{font-size:11px; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--cherry)}
+  .hero{padding:56px 0 26px}
+  .hero h1{font-size:clamp(32px,4.4vw,48px); margin:14px 0 12px; text-transform:uppercase}
+  .hero p{color:var(--muted); max-width:760px; font-size:15px}
+  .bar{display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; margin-top:20px}
+  .btn{display:inline-block; padding:10px 20px; border-radius:4px; font-weight:700; font-size:13.5px; border:1px solid var(--line); background:#fff; color:var(--ink); cursor:pointer; transition:.15s; font-family:'Neue Haas Grotesk',sans-serif}
+  .btn:hover{border-color:var(--cherry); color:var(--cherry)}
+  .btn-primary{background:var(--cherry); color:#fff; border-color:var(--cherry)}
+  .btn-primary:hover{background:var(--cherry-deep); color:#fff}
+  .main{display:grid; grid-template-columns:440px 1fr; gap:26px; padding:26px 0 80px; align-items:start}
+  .col{display:flex; flex-direction:column; gap:16px}
+  .card{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:22px}
+  .card h3{font-family:'Interstate',sans-serif; font-size:15px; text-transform:uppercase; margin-bottom:4px; color:var(--ink)}
+  .card .hint{font-size:12px; color:var(--dim); margin-bottom:14px}
+  .field{margin-bottom:14px}
+  .field:last-child{margin-bottom:0}
+  label{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin-bottom:6px}
+  input[type=text], textarea, select{
+    width:100%; background:var(--field); border:1px solid var(--line2); border-radius:6px;
+    color:var(--ink); font-family:'Neue Haas Grotesk',sans-serif; font-size:13.5px; padding:10px 12px; outline:none; transition:border .15s;
+  }
+  input:focus, textarea:focus, select:focus{border-color:var(--cherry)}
+  textarea{resize:vertical; min-height:64px}
+  .req{color:var(--cherry)}
+  .doc{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:44px 48px; font-size:13.5px; line-height:1.65; color:#2b2b2b}
+  .doc h1{font-family:'Interstate',sans-serif; font-size:28px; color:var(--ink); margin-bottom:4px; text-transform:uppercase}
+  .doc h2{font-family:'Interstate',sans-serif; font-size:16px; color:var(--cherry-deep); margin:26px 0 8px; padding-bottom:5px; border-bottom:1px solid var(--line)}
+  .doc h3{font-family:'Interstate',sans-serif; font-size:13px; color:var(--ink); margin:14px 0 4px; text-transform:uppercase}
+  .doc p{margin-bottom:8px; color:#3a3a3a}
+  .doc ul{margin:0 0 10px 20px; color:#3a3a3a}
+  .doc li{margin-bottom:4px}
+  .doc table{width:100%; border-collapse:collapse; margin:8px 0 12px; font-size:12.5px}
+  .doc th{text-align:left; background:var(--tint); padding:7px 10px; border:1px solid var(--line); color:var(--ink)}
+  .doc td{padding:7px 10px; border:1px solid var(--line); vertical-align:top; color:#3a3a3a}
+  .docmeta{display:flex; gap:18px; flex-wrap:wrap; margin:14px 0 6px; font-size:12px; color:var(--muted)}
+  .docmeta b{color:var(--ink); font-weight:700}
+  .tag{display:inline-block; background:var(--tint); border:1px solid #f3cdd2; color:var(--cherry-deep); font-size:10.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; padding:3px 9px; border-radius:999px; margin:2px 4px 2px 0}
+  .sample-note{background:#f7f7f7; border:1px solid var(--line); color:var(--muted); font-size:12.5px; border-radius:10px; padding:10px 14px; margin-top:14px}
+  .sample-note b{color:var(--cherry-deep)}
+  .placeholder{color:var(--dim); font-style:italic}
+  .footer{padding:40px 0 60px; border-top:1px solid var(--line)}
+  .footer p{color:var(--muted); font-size:13px; max-width:760px}
+  .sticky-doc{position:sticky; top:20px}
+  .docbar{display:flex; gap:10px; justify-content:flex-end; margin-bottom:12px; flex-wrap:wrap}
+  @media(max-width:980px){ .main{grid-template-columns:1fr} .sticky-doc{position:static} .doc{padding:28px 22px} }
+</style>
+</head>
+<body>
+
+<div class="topbar"><div class="wrap" style="display:flex;align-items:center;justify-content:space-between;width:100%">
+  <div class="brand">BRD <span>Builder</span></div>
+  <div style="font-size:12.5px;color:var(--dim)">by Cat Nolasco · People Operations</div>
+</div></div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Business Requirements Document generator</div>
+    <h1>Turn a business need into a BRD,<br>ready for engineering handoff<span class="cherry">.</span></h1>
+    <p>Describe the pain, the process, and the people involved. The builder structures it into a Business Requirements Document with process inputs, outputs, system dependencies, and automation logic, the sections engineering needs to build from. Everything runs in your browser; nothing is sent anywhere.</p>
+    <div class="bar">
+      <div class="eyebrow" style="color:var(--dim)">SAMPLE DATA ONLY · no real employee data</div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap">
+        <button class="btn" onclick="loadExample()">Load example: payroll consolidation</button>
+        <button class="btn" onclick="clearForm()">Clear all</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="col">
+      <div class="card">
+        <h3>Business need</h3>
+        <div class="hint">Answer like you are explaining it to a smart colleague who knows nothing about the process.</div>
+        <div class="field">
+          <label>BRD title <span class="req">*</span></label>
+          <input type="text" id="f_title" placeholder="e.g. Consolidate payroll inputs across entities" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Document owner</label>
+          <input type="text" id="f_owner" placeholder="e.g. Cat Nolasco, People Operations" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Background: why now, what changed <span class="req">*</span></label>
+          <textarea id="f_context" placeholder="The company is scaling; the process was built for a smaller team; inputs now arrive from multiple owners in inconsistent formats." oninput="build()"></textarea>
+        </div>
+        <div class="field">
+          <label>The pain: what happens today, and why it hurts <span class="req">*</span></label>
+          <textarea id="f_pain" placeholder="Manual consolidation, errors caught downstream, owners invisible, close takes days." oninput="build()"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Process details</h3>
+        <div class="hint">The more specific, the better the BRD.</div>
+        <div class="field">
+          <label>Who is affected?</label>
+          <input type="text" id="f_users" placeholder="e.g. People Ops team, payroll vendor, Finance" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Volume and frequency</label>
+          <input type="text" id="f_vol" placeholder="e.g. ~160 employees, monthly close, 40+ input items" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Systems involved today</label>
+          <input type="text" id="f_sys" placeholder="e.g. Workday, Slack, Gmail, Excel, JIRA" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Compliance or sensitivity constraints</label>
+          <input type="text" id="f_comp" placeholder="e.g. Payroll accuracy, data privacy, audit trail" oninput="build()">
+        </div>
+        <div class="field">
+          <label>What does good look like? (success measures)</label>
+          <input type="text" id="f_okr" placeholder="e.g. Close in under one day, zero missed inputs, full audit trail" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Known constraints (things that cannot change)</label>
+          <input type="text" id="f_constr" placeholder="e.g. Workday stays the system of record, no new vendor without approval" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Explicitly out of scope</label>
+          <input type="text" id="f_nongoal" placeholder="e.g. Rebuilding Workday payroll config, automating compensation decisions" oninput="build()">
+        </div>
+        <div class="field">
+          <label>Open questions for stakeholders</label>
+          <textarea id="f_openq" placeholder="e.g. Who submits inputs directly vs through an assistant? What is the approval path for off-cycle corrections?" oninput="build()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="sticky-doc">
+        <div class="docbar">
+          <button class="btn" onclick="copyDoc()">Copy BRD</button>
+          <button class="btn" onclick="downloadDoc()">Download .md</button>
+          <button class="btn" onclick="window.print()">Print / PDF</button>
+        </div>
+        <div class="doc" id="doc"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sample-note"><b>About this page:</b> a working demonstration of BRD writing, built for my portfolio. All fields are blank until you fill them or load the sample. Sample data is fictional and generic; no real employee or company data is stored or transmitted. Brand styling matches the public BlinkRx site (blinkrx.com) by inspection, as a demonstration for my application to Blink Health's Sr. Lead, People Operations &amp; Automation role. The output mirrors the structure required for engineering handoff: inputs, outputs, dependencies, and automation logic.</div>
+
+  <div class="footer">
+    <p><a href="/" style="color:var(--cherry-deep); font-weight:700">&larr; Back to main portfolio</a></p>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+
+function esc(s){
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function li(items){
+  return items.filter(Boolean).map(i => '<li>'+esc(i)+'</li>').join('');
+}
+function today(){
+  const d = new Date();
+  return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+}
+function sect(n, title, body){
+  if(!body || !body.trim()) return '';
+  return '<h2>'+n+'. '+esc(title)+'</h2>'+body;
+}
+function bullets(raw){
+  return raw.split('\n').map(s=>s.trim()).filter(Boolean);
+}
+
+function build(){
+  const v = {
+    title: $('f_title').value.trim(),
+    owner: $('f_owner').value.trim(),
+    context: $('f_context').value.trim(),
+    pain: $('f_pain').value.trim(),
+    users: $('f_users').value.trim(),
+    vol: $('f_vol').value.trim(),
+    sys: $('f_sys').value.trim(),
+    comp: $('f_comp').value.trim(),
+    okr: $('f_okr').value.trim(),
+    constr: $('f_constr').value.trim(),
+    nongoal: $('f_nongoal').value.trim(),
+    openq: $('f_openq').value.trim()
+  };
+  const doc = $('doc');
+  if(!v.title){
+    doc.innerHTML = '<div class="placeholder">Fill in the business need on the left, or load the sample. The BRD builds here live as you type.</div>';
+    return;
+  }
+  const title = v.title.charAt(0).toUpperCase() + v.title.slice(1);
+  const users = v.users || 'People Operations and cross-functional partners';
+  const systems = v.sys || 'current systems';
+  const freq = v.vol || 'the operating cycle';
+
+  let h = '';
+  h += '<h1>'+esc(title)+'</h1>';
+  h += '<div class="docmeta"><span><b>BRD ID:</b> BRD-'+Date.now().toString().slice(-5)+'</span><span><b>Owner:</b> '+esc(v.owner||'People Operations')+'</span><span><b>Status:</b> Draft</span><span><b>Version:</b> 1.0</span><span><b>Date:</b> '+today()+'</span></div>';
+  h += '<div><span class="tag">People Ops</span><span class="tag">Automation</span><span class="tag">Engineering handoff</span></div>';
+
+  h += sect(1, 'Background', '<p>'+esc(v.context||'This document defines the business need and the requirements for the change. It is written for engineering, systems, and vendor partners to build from, and for stakeholders to confirm scope and success criteria.')+'</p>');
+  h += sect(2, 'Problem Statement', '<p>'+esc(v.pain||'The current process is manual, invisible, and built for a smaller organization. It creates risk, consumes team time, and does not scale with the business.')+'</p><p><b>Affected users:</b> '+esc(users)+'. <b>Volume:</b> '+esc(freq)+'.</p>');
+
+  const goals = [];
+  if(v.okr){ goals.push('Meet the agreed success bar: '+esc(v.okr)+'.'); }
+  goals.push('Remove the manual, error-prone steps so the team spends time on judgment work, not transcription and chasing.');
+  goals.push('Make every step visible: owners, status, and handoffs trackable in one place.');
+  goals.push('Keep sensitive data protected and keep a human in the loop for every decision with employment, pay, or compliance impact.');
+  h += sect(3, 'Goals', '<ul>'+li(goals)+'</ul>');
+
+  h += sect(4, 'Scope', '<p><b>In scope:</b> the end-to-end '+esc(title.toLowerCase())+' workflow as described in this document, including intake, routing, review, approval, and handoff.</p><p><b>Out of scope:</b> '+(v.nongoal?esc(v.nongoal)+'.':'changes to the systems of record themselves and any decision-making that requires human judgment.')+'</p>');
+
+  h += sect(5, 'Stakeholders', '<ul>'+li([
+    'Business owner: '+(v.owner||'People Operations'),
+    'Engineering partner: owns build, testing, and deployment of the automation',
+    'Systems / Workday admin: owns configuration and integration on the system of record',
+    'Business users: '+users,
+    'Compliance and Finance: review and sign-off where pay, data, or regulatory impact exists'
+  ])+'</ul>');
+
+  h += sect(6, 'Current State', '<p>The process today runs across '+esc(systems)+' and is coordinated manually. Inputs arrive from multiple owners in inconsistent formats, consolidation is done by hand, and there is no single view of status or history. Errors are usually found downstream, after they have already cost time.</p>');
+
+  h += sect(7, 'Proposed Process', '<p>The target process has four stages, each with a clear owner and an exit condition:</p><ul>'+li([
+    'Intake: all inputs arrive through one structured channel with a required format and validation.',
+    'Consolidation: automation assembles, validates, and flags exceptions; humans handle anything that needs judgment.',
+    'Review and approval: approvers see a single summary and approve or return with comments.',
+    'Handoff: approved data flows to '+esc(systems)+' with a complete audit trail, and status is visible to everyone involved.'
+  ])+'</ul>');
+
+  h += '<h2>8. Requirements</h2>';
+  h += '<h3>8.1 Process inputs</h3><ul>'+li([
+    'Structured submission from each input owner, with required fields and format validation',
+    'Supporting data pulled from '+esc(systems)+' where available, to reduce manual entry',
+    'Exception flag when data is missing, out of range, or inconsistent with prior cycles'
+  ])+'</ul>';
+  h += '<h3>8.2 Process outputs</h3><ul>'+li([
+    'A validated, consolidated dataset ready for '+esc(systems)+'',
+    'A single status view showing every item, owner, and stage',
+    'An audit trail of every change, approver, and timestamp'
+  ])+'</ul>';
+  h += '<h3>8.3 Functional requirements</h3><ul>'+li([
+    'FR-01: Accept submissions through one intake channel with format validation.',
+    'FR-02: Auto-assemble submissions into a consolidated view, flagging duplicates and gaps.',
+    'FR-03: Route exceptions to the right owner with a required response.',
+    'FR-04: Present a single summary to approvers; approval or return recorded with reason.',
+    'FR-05: Export approved data to '+esc(systems)+' with mapping and error reporting.',
+    'FR-06: Keep a complete, queryable audit trail for every cycle.'
+  ])+'</ul>';
+  h += '<h3>8.4 System dependencies</h3><ul>'+li([
+    (v.sys ? esc(v.sys)+' are the systems in play today; '+esc(v.sys.split(',')[0].trim())+' is treated as the system of record where applicable.' : 'The system of record is the source of truth for approved data; integrations and notifications use the existing tool stack.'),
+    'Notifications and routing run through the collaboration tools the team already uses.',
+    'No new vendor or tool enters scope without stakeholder approval.'
+  ])+'</ul>';
+  h += '<h3>8.5 Automation logic</h3><ul>'+li([
+    'Trigger: a new intake submission or a scheduled cycle start.',
+    'Rules: deterministic validation rules run first; anything ambiguous routes to a human.',
+    'Human in the loop: approvals, exceptions, and any change to pay, employment, or compliance data require a named human approver.',
+    'PII-safe: no raw employee data is sent to any external model. Aggregates, anonymized samples, and approved policy text only.',
+    'Failure handling: failed steps retry with backoff, then alert the owner with the exact item that failed.'
+  ])+'</ul>';
+  h += '<h3>8.6 AI usage (where applicable)</h3><p>LLM-based tools are candidates for the non-deterministic parts only: summarizing exceptions, drafting responses to input owners, and classifying free-text submissions into known categories. Every AI output is reviewed before it acts, and the model never receives raw employee records.</p>';
+
+  const metrics = [];
+  if(v.okr){ metrics.push(esc(v.okr)+'.'); }
+  metrics.push('Cycle time for the process, measured per cycle and compared to baseline.');
+  metrics.push('Exception rate and time-to-resolution for flagged items.');
+  metrics.push('Manual hours removed, tracked against the pre-automation baseline.');
+  metrics.push('Audit completeness: 100% of changes traceable to an owner and timestamp.');
+  h += sect(9, 'Success Metrics', '<ul>'+li(metrics)+'</ul>');
+
+  h += sect(10, 'Risks and Dependencies', '<ul>'+li([
+    (v.constr?esc(v.constr)+'.':'Dependencies: system access, data mapping, and stakeholder availability must be confirmed before build.'),
+    'Data quality: garbage in, garbage out. Validation and exception routing are the controls that keep quality high.',
+    'Adoption: the new intake channel only works if every input owner uses it, which is why change support is part of this scope.',
+    'Human approval is a deliberate constraint, not a missing feature: it is the control that keeps this safe.'
+  ])+'</ul>');
+
+  const oq = v.openq ? bullets(v.openq) : ['Who submits directly vs through an assistant?','What is the approval path for off-cycle corrections?','Which reporting views do stakeholders need first?'];
+  h += sect(11, 'Open Questions', '<ul>'+li(oq)+'</ul>');
+
+  h += sect(12, 'Engineering Handoff Notes', '<ul>'+li([
+    'Build against the system of record; do not introduce a second source of truth.',
+    'Ship the intake + validation layer first, then consolidation, then approval routing, then export.',
+    'Every rule must have a named owner and a test case, including the failure paths.',
+    'Deliver the audit trail from day one, not as an afterthought.'
+  ])+'</ul>');
+
+  doc.innerHTML = h;
+}
+
+function loadExample(){
+  $('f_title').value = 'Consolidate payroll inputs across US and India entities';
+  $('f_owner').value = 'Cat Nolasco, People Operations';
+  $('f_context').value = 'The company is scaling fast and People Ops is managing a growing multi-entity workforce across the US and India. Payroll inputs arrive from multiple owners in email, Slack, and spreadsheets, then get consolidated by hand before entry into the system of record. The process was built for a smaller organization and no longer holds.';
+  $('f_pain').value = 'Inputs arrive in inconsistent formats from multiple owners. Consolidation is manual, invisible, and error prone. The monthly close takes three or more business days, and mistakes are usually caught downstream, after they have already cost time and trust.';
+  $('f_users').value = 'People Operations (3 team members), payroll vendor, Finance, and the input owners across both entities';
+  $('f_vol').value = '~160 employees across two entities, monthly close, 40+ input items per cycle';
+  $('f_sys').value = 'Workday (system of record), Slack, Gmail, Excel, JIRA';
+  $('f_comp').value = 'Payroll accuracy, employee data privacy, full audit trail of changes';
+  $('f_okr').value = 'Close in under one business day, zero missed inputs, one intake channel, complete audit trail';
+  $('f_constr').value = 'Workday remains the system of record. No new vendor without stakeholder approval. Sensitive employee data stays out of any external model.';
+  $('f_nongoal').value = 'Rebuilding Workday payroll configuration. Automating compensation decisions.';
+  $('f_openq').value = 'Which owners submit directly vs through an assistant?\nWhat is the approval path for off-cycle corrections?\nWhich reporting views do stakeholders need first?';
+  build();
+}
+
+function clearForm(){
+  ['f_title','f_owner','f_context','f_pain','f_users','f_vol','f_sys','f_comp','f_okr','f_constr','f_nongoal','f_openq'].forEach(id => $(id).value = '');
+  build();
+}
+
+function copyDoc(){
+  const text = $('doc').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    alert('BRD copied to clipboard.');
+  }).catch(() => alert('Copy failed. Select the document text and copy manually.'));
+}
+
+function downloadDoc(){
+  const text = $('doc').innerText;
+  const title = ($('f_title').value.trim() || 'business-requirements-document').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
+  const blob = new Blob([text], {type:'text/markdown'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = title + '.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+
+build();
+</script>
+</body>
+</html>
